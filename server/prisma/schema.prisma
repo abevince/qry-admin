@@ -1,0 +1,152 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model ara_tech {
+  id          Int    @id @default(autoincrement())
+  username    String @db.VarChar(100)
+  survey_id   Int
+  rating      Int
+  school      String @db.VarChar(100)
+  response_id String @db.VarChar(100)
+
+  @@map("_ara_tech")
+}
+
+model quest_dependency {
+  id               BigInt @id @default(autoincrement())
+  questionid       BigInt @default(0)
+  surveyid         BigInt
+  dependquestionid BigInt @default(0)
+  dependchoiceid   BigInt @default(0)
+  dependlogic      Int    @default(0) @db.TinyInt
+  dependandor      String @default("") @db.VarChar(4)
+
+  @@index([questionid], name: "mdl_quesdepe_que_ix")
+}
+
+model quest_question {
+  id                    Int                     @id @default(autoincrement())
+  quest_id              Int
+  name                  String                  @db.VarChar(255)
+  type_id               Int
+  question              String                  @db.VarChar(255)
+  required              Boolean
+  position              Int
+  min                   Int
+  max                   Int
+  status_               Int
+  quest_question_choice quest_question_choice[]
+}
+
+model quest_question_choice {
+  id                  Int                   @id @default(autoincrement())
+  question_id         Int
+  content             String                @db.VarChar(255)
+  value               Int
+  quest_question      quest_question        @relation(fields: [question_id], references: [id])
+  quest_response_rank quest_response_rank[]
+
+  @@index([question_id], name: "question_id")
+}
+
+model quest_response {
+  id          Int     @id @default(autoincrement())
+  response_id String  @db.VarChar(64)
+  quest_id    Int
+  submitted   Int
+  complete    Int
+  username    String  @db.VarChar(256)
+  school      String  @db.VarChar(256)
+  schools     schools @relation(fields: [school], references: [schoolid])
+
+  @@index([school], name: "school")
+}
+
+model quest_response_bool {
+  id          Int    @id @default(autoincrement())
+  response_id String @db.VarChar(64)
+  question_id Int
+  choice_id   String @db.VarChar(5)
+}
+
+model quest_response_multiple {
+  id          Int    @id @default(autoincrement())
+  response_id String @db.VarChar(64)
+  question_id Int
+  choice_id   Int
+
+  @@index([choice_id], name: "choice_id")
+  @@index([question_id], name: "question_id")
+  @@index([response_id], name: "response_id")
+}
+
+model quest_response_rank {
+  id                    Int                   @id @default(autoincrement())
+  response_id           String                @db.VarChar(64)
+  question_id           Int
+  choice_id             Int
+  rank                  Int
+  quest_question_choice quest_question_choice @relation(fields: [choice_id], references: [id])
+
+  @@index([choice_id], name: "choice_id")
+  @@index([response_id], name: "response_id")
+}
+
+model quest_response_single {
+  id          Int    @id @default(autoincrement())
+  response_id String @db.VarChar(64)
+  question_id Int
+  choice_id   Int
+
+  @@index([choice_id], name: "choice_id")
+  @@index([question_id], name: "question_id")
+  @@index([response_id], name: "response_id")
+}
+
+model quest_response_text {
+  id          Int    @id @default(autoincrement())
+  response_id String @db.VarChar(64)
+  question_id Int
+  response    String @db.LongText
+}
+
+model question_type {
+  id           Int     @id @default(autoincrement())
+  type_id      Int
+  type_        String  @db.VarChar(100)
+  has_choices  Boolean
+  response_tbl String  @db.VarChar(100)
+}
+
+model questionnaires {
+  id            Int     @id @default(autoincrement())
+  questionnaire String  @db.VarChar(256)
+  program       String  @db.VarChar(256)
+  for_          String  @db.VarChar(100)
+  status        Boolean @default(false)
+  curr_school   String  @db.VarChar(150)
+}
+
+model schools {
+  id             Int              @id @default(autoincrement())
+  schoolname     String           @db.VarChar(256)
+  schoolid       String           @unique @db.VarChar(256)
+  program        String           @db.VarChar(30)
+  status         Boolean          @default(false)
+  quest_response quest_response[]
+}
+
+model users {
+  id        Int    @id @default(autoincrement())
+  token     String @unique @db.VarChar(100)
+  user_type Int
+  name      String @db.VarChar(200)
+  schoolid  String @db.VarChar(100)
+  quest_id  Int
+}

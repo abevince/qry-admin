@@ -1,0 +1,10 @@
+{
+  "extends": "fastify-tsconfig",
+  "compilerOptions": {
+    "outDir": "dist",
+    "strictPropertyInitialization": false,
+    "esModuleInterop": true,
+    "lib": ["es2019", "esnext.asynciterable"]
+  },
+  "include": ["src/**/*"]
+}
